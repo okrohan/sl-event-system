@@ -1,0 +1,20 @@
+{
+  "name": "sl-event-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:infra": "echo \"Error: no test specified\" && exit 1",
+    "infra:up": "docker-compose -f shared/infra/docker-compose.yml up -d",
+    "infra:down": "docker-compose -f shared/infra/docker-compose.yml down",
+    "infra:logs": "docker-compose -f shared/infra/docker-compose.yml logs -f",
+    "service:dev": "cd services/event-ingestion && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kafka-node": "^5.0.0",
+    "winston": "^3.17.0"
+  }
+}
