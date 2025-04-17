@@ -23,6 +23,9 @@ A distributed event processing system built with Node.js, Kafka, and MongoDB. Th
 
 ## API Endpoints
 ### Ingestion Service: Dispatch SMS Event
+### NOTE: TO Simulate the failure mechanism, uncomment the below line, and rebuild docker-compose 
+https://github.com/okrohan/sl-event-system/blob/main/workspaces/dispatcher-service/src/clients/mailgunEmailClient.ts#L9
+
 ```
 curl --location 'localhost:3000/event' \
 --header 'Content-Type: application/json' \
