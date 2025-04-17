@@ -14,6 +14,10 @@ To run the application, use the following command:
 
 ```bash
 docker-compose up --build
+TODO: TO be fixed in docker-compose (Wait for 30 seconds once up for Kafka topics to be configured.and then restart)
+docker-compose down 
+Restart
+docker-compose up --build
 ```
 
 This command will build and start all the services defined in the `docker-compose.yml` file.
