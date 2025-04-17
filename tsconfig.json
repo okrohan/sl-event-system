@@ -1,0 +1,10 @@
+{
+    "files": [],
+    "references": [
+      { "path": "workspaces/shared" },
+      { "path": "workspaces/dispatcher-service" },
+      { "path": "workspaces/retry-service" },
+      { "path": "workspaces/event-ingestion" }
+    ]
+  }
+  

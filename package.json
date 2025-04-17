@@ -1,14 +1,30 @@
 {
   "name": "sl-event-system",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "workspaces/*"
+  ],
   "scripts": {
-    "start:infra": "echo \"Error: no test specified\" && exit 1",
-    "infra:up": "docker-compose -f shared/infra/docker-compose.yml up -d",
-    "infra:down": "docker-compose -f shared/infra/docker-compose.yml down",
-    "infra:logs": "docker-compose -f shared/infra/docker-compose.yml logs -f",
-    "service:dev": "cd services/event-ingestion && npm run dev"
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces",
+    "dev:event": "npm run dev --workspace=@sl-event-system/event-ingestion",
+    "dev:dispatcher": "npm run dev --workspace=@sl-event-system/dispatcher-service",
+    "dev:retry": "npm run dev --workspace=@sl-event-system/retry-service",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "prettier --write \"workspaces/**/*.{ts,js,json,yml,yaml}\"",
+    "format:check": "prettier --check \"workspaces/**/*.{ts,js,json,yml,yaml}\"",
+    "cleanup": "npm run lint:fix --workspaces && npm run format",
+    "remove-comments": "eslint . --ext .ts --fix",
+    "services:up": "docker-compose up -d --build",
+    "servies:down": "docker-compose down -v",
+    "docker:up": "npm run infra:up && npm run services:up",
+    "docker:down": "npm run infra:down && npm run services:down",
+    "infra:up": "docker-compose -f workspaces/shared/infra/docker-compose.yml up -d --build",
+    "infra:down": "docker-compose -f workspaces/shared/infra/docker-compose.yml down -v",
+    "infra:logs": "docker-compose -f workspaces/shared/infra/docker-compose.yml logs -f"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +32,11 @@
   "dependencies": {
     "kafka-node": "^5.0.0",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3"
   }
 }

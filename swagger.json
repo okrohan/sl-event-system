@@ -1,0 +1,266 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SL Event System API",
+    "version": "1.0.0",
+    "description": "API documentation for the SL Event System"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Event Ingestion Service"
+    },
+    {
+      "url": "http://localhost:3005",
+      "description": "Retry Service"
+    }
+  ],
+  "paths": {
+    "/event": {
+      "post": {
+        "tags": ["Event Ingestion"],
+        "summary": "Ingest a new event",
+        "description": "Creates a new event and routes it based on priority",
+        "operationId": "createEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRequest"
+              },
+              "examples": {
+                "critical-email": {
+                  "value": {
+                    "eventId": "email-123",
+                    "channel": "email",
+                    "payload": {
+                      "to": "user@example.com",
+                      "subject": "Important Notification",
+                      "body": "This is a critical message"
+                    },
+                    "metadata": {
+                      "provider": "sendgrid"
+                    },
+                    "priority": "CRITICAL"
+                  }
+                },
+                "default-push": {
+                  "value": {
+                    "eventId": "push-456",
+                    "channel": "push",
+                    "payload": {
+                      "token": "device-token",
+                      "title": "Notification",
+                      "body": "This is a regular notification"
+                    },
+                    "metadata": {
+                      "provider": "firebase"
+                    },
+                    "priority": "DEFAULT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event successfully ingested",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/replay-dead-letter": {
+      "post": {
+        "tags": ["Retry Service"],
+        "summary": "Replay dead letter events",
+        "description": "Replays events from the dead letter queue with optional pagination",
+        "operationId": "replayDeadLetter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "limit": 1000,
+                    "from": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Events successfully replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health Check"],
+        "summary": "Check service health",
+        "description": "Returns the health status of the service",
+        "operationId": "checkHealth",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EventRequest": {
+        "type": "object",
+        "required": ["channel", "payload", "priority"],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "description": "Unique identifier for the event"
+          },
+          "channel": {
+            "type": "string",
+            "enum": ["email", "sms", "push"],
+            "description": "Channel type for the event"
+          },
+          "payload": {
+            "type": "object",
+            "description": "Event payload specific to the channel"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string",
+                "description": "Service provider name"
+              }
+            }
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["CRITICAL", "DEFAULT"],
+            "description": "Event priority level"
+          }
+        }
+      },
+      "ReplayRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1000,
+            "description": "Maximum number of events to replay"
+          },
+          "from": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Starting position for pagination"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Event Ingested"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Failed to send event"
+          }
+        }
+      },
+      "ReplayResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Event Replayed"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of events replayed"
+          },
+          "from": {
+            "type": "integer",
+            "description": "Starting position used"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit used"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "service": {
+            "type": "string",
+            "example": "event-ingestion"
+          }
+        }
+      }
+    }
+  }
+} 

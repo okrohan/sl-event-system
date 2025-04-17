@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "no-unused-vars": ["error", { "varsIgnorePattern": "^[A-Z]" }],
+    "@typescript-eslint/no-unused-vars": ["error", { "varsIgnorePattern": "^[A-Z]" }],
+    "no-warning-comments": ["error", { "terms": ["todo", "fixme", "xxx"], "location": "anywhere" }],
+    "spaced-comment": ["error", "never"],
+    "multiline-comment-style": ["error", "starred-block"],
+    "@typescript-eslint/no-explicit-any": "off"
+  },
+  "ignorePatterns": ["dist", "node_modules", "*.js"]
+} 

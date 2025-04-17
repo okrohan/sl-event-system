@@ -1,0 +1,30 @@
+{
+  "name": "@sl-event-system/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and types for the SL Event System",
+  "main": "dist",
+  "types": "dist",
+  "scripts": {
+    "clean": "rimraf dist && rimraf *.tsbuildinfo",
+    "build": "npm run clean && tsc",
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.2",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  }
+}
