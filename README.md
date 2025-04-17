@@ -20,7 +20,36 @@ This command will build and start all the services defined in the `docker-compos
 
 A distributed event processing system built with Node.js, Kafka, and MongoDB. This system is designed to handle events with different priorities, provide retry mechanisms, and ensure reliable event delivery.
 
+
+## API Endpoints
+### Ingestion Service: Dispatch SMS Event
+```
+curl --location 'localhost:3000/event' \
+--header 'Content-Type: application/json' \
+--data '{
+    "channel": "sms",
+    "payload": {
+        "message": "Test SMS",
+        "phoneNumber": "2025555555"
+    },
+    "metadata": {
+
+    },
+    "priority": "default"
+}
+'
+
+```
+
+### Replay Service: Replay Dead Lettered Events
+```
+curl --location 'localhost:3005/replay-dead-letter' \
+--header 'Content-Type: application/json' \
+--data '{}'
+```
 ## Architecture
+### HLD
+![arch_diag](https://github.com/user-attachments/assets/0d0d68af-8eab-4128-84b4-6f9f5b026b86)
 
 The system consists of several microservices (Ports as configured in docker-compose):
 
@@ -49,41 +78,49 @@ The system consists of several microservices (Ports as configured in docker-comp
    - MongoDB for event persistence
    - Docker for containerization
    - Node and express for RESTful server
+  
+### Sequence
+#### Event Ingestion
+```
+API Gateway -> Event Ingestion Service (Enrich, validate event and dispatch message on priority topic)
+Dispatcher Service (Dispatch to providers) -> Failure ? Push to Retry Queue -> Success ? Mark Done
+Retry Service (Evaluate Retry Logic and BackOff)  (Push back to Dispatcher Service) -> RETRY COUNT EXCEEDED? Mark Deal Lettered
 
-## Environment Variables
+```
 
-### Kafka Configuration
-- `KAFKA_BROKERS`: Kafka broker address (default: kafka:9092)
-- `KAFKA_TOPIC`: Kafka topic name
+## PRD and Tracking
 
-### MongoDB Configuration
-- `MONGODB_URI`: MongoDB connection string
-- `MONGODB_DB_NAME`: Database name
+### Ingestion Service
+- [x] Add endpoint to ingest data
+- [x] Enrich and validate event data
+- [x] Push to Kafka Stream based on priority
+- [x] Update event document status to MongoDB
+- [ ] TODO: Add Open API Docs
+- [ ] TDO: CODE Clean UP
 
-### Service Configuration
-- `PORT`: Service port number
-- `NODE_ENV`: Environment (development/production)
-- `LOG_LEVEL`: Logging level
+### Dispatcher Service
+- [x] Consume Event data 
+- [x] Enrich and validate event data
+- [x] Push to Kafka Stream based on priority
+- [x] Validate provider and dispatch event to notification provider
+- [x] SYNC: Validate provider dispatch event
+- [ ] ASYNC: Validate provider dispatch event for HOOK based async clients
+- [x] Dispatch to retry service on notification failure
+- [x] Update event document statuses to MongoDB
+- [ ] TDO: CODE Clean UP
 
-## API Endpoints
-
-### Event Ingestion Service
-- `POST /events`
-  ```json
-  {
-    "eventId": "string",
-    "channel": "string",
-    "payload": object,
-    "metadata": {
-      "provider": "string"
-    },
-    "priority": "CRITICAL" | "DEFAULT"
-  }
-  ```
 
 ### Retry Service
-- `POST /replay-dead-letter`
-  - Replays events from the dead letter queue
+- [x] Consume retry events and process
+- [x] Setup rule engine to process events by context
+- [x] Local setTimeout based backoff logic
+- [ ] TODO: Move backedOff logic to a queue
+- [x] Add endpoint to replay Dead lettered events
+- [ ] TODO: Add Open API Docs
+- [ ] TDO: CODE Clean UP
+
+
+
 
 ## Monitoring
 
@@ -91,29 +128,3 @@ The system consists of several microservices (Ports as configured in docker-comp
   - Username: admin
   - Password: admin
 
-## Sample Requests
-### Dispatch SMS Event
-```
-curl --location 'localhost:3000/event' \
---header 'Content-Type: application/json' \
---data '{
-    "channel": "sms",
-    "payload": {
-        "message": "Test SMS",
-        "phoneNumber": "2025555555"
-    },
-    "metadata": {
-
-    },
-    "priority": "default"
-}
-'
-
-```
-
-### Replay Dead Lettered Events
-```
-curl --location 'localhost:3005/replay-dead-letter' \
---header 'Content-Type: application/json' \
---data '{}'
-```
